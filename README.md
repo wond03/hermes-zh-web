@@ -25,7 +25,38 @@ hermes config set plugins.enabled '["hermes-zh"]'   # 用户插件必须显式�
 systemctl restart hermes-dashboard
 ```
 
-装好后刷新浏览器，侧边栏不会多出页面（它是纯运行时增强），但英文界面文案会变中文。
+> 插件市场里已经有一个同名的 `hermes-zh`（别人的简体中文语言包）。从 GitHub 安装到同名目录会覆盖，装之前先看一眼 `~/.hermes/plugins/hermes-zh` 是不是空的。
+
+装好后刷新浏览器：侧边栏多出一个「中文增强」页（`/hermes-zh`，只有说明和一个停用按钮），其余英文界面文案变中文。
+
+## 关闭 / 恢复 / 卸载
+
+**临时关掉（保留插件，随时开回来）**
+
+三个入口任选：
+
+1. 侧边栏「中文增强」→ 点「停用中文（界面回到英文）」→ 页面自动刷新，界面立刻是英文
+2. 「插件」页 → 拉到「已安装插件」→ 找到 `hermes-zh` → 点「停用」
+3. 命令行：
+
+```bash
+hermes config set plugins.enabled '[]'     # 只留这一项的话；有其它插件就保留它们的名字
+systemctl restart hermes-dashboard
+```
+
+停用后**刷新浏览器就生效**，不用重启服务。想恢复：「插件」页 → `hermes-zh` → 「启用」→ 刷新。
+
+**彻底卸载**
+
+```bash
+rm -rf ~/.hermes/plugins/hermes-zh
+hermes config set plugins.enabled '[]'
+systemctl restart hermes-dashboard
+```
+
+或在「插件」页点该插件的「卸载」（会连目录一起删）。
+
+> 插件包里有 `plugin.yaml`，所以宿主把它当作正常用户插件：插件页的「启用 / 停用 / 更新 / 卸载」四个按钮都可用。
 
 ## 更新词典
 

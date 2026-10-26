@@ -172,13 +172,31 @@ __PAIRS__
     var R = SDK.React;
     if (!R) return null;
     var h = R.createElement;
+    var box = R.useState(""), st = box[0], setSt = box[1];
     var muted = { color: "var(--text-tertiary, #888)", fontSize: 12, margin: "4px 0" };
+    function off() {
+      setSt("正在停用…");
+      fetch("/api/dashboard/agent-plugins/hermes-zh/disable", {
+        method: "POST", headers: { "Content-Type": "application/json" }, body: "{}",
+      }).then(function (r) { return r.json(); }).then(function (d) {
+        if (d && d.ok) { location.reload(); }
+        else { setSt("停用失败：" + ((d && d.error) || "未知原因")); }
+      }).catch(function (e) { setSt("停用失败：" + e); });
+    }
     return h("div", { style: { padding: "20px 16px", maxWidth: 720, lineHeight: 1.8, fontSize: 14 } },
       h("h2", { style: { margin: "0 0 10px", fontSize: 18 } }, "中文增强"),
       h("p", { style: { margin: "0 0 6px" } },
         "运行时词典已加载 " + __COUNT__ + " 条，把控制台里写死的英文界面文案替换成中文。"),
       h("p", { style: { margin: "0 0 6px" } }, "状态：已启用"),
-      h("p", { style: muted }, "不想用了就在「插件」页停用或卸载它，界面立刻回到英文。"),
+      h("button", {
+        onClick: off,
+        style: {
+          margin: "8px 0 10px", padding: "6px 14px", borderRadius: 6, fontSize: 13,
+          border: "1px solid var(--border, #444)", background: "transparent",
+          color: "inherit", cursor: "pointer",
+        },
+      }, "停用中文（界面回到英文）"),
+      h("p", { style: muted }, st || "点一下会停用并刷新页面，界面立刻回到英文。想恢复：到「插件」页把 hermes-zh 启用后刷新。"),
       h("p", { style: muted },
         "只覆盖组件里写死的英文；词条文件、配置页字段说明、登录页、手机端输入栏由配套补丁负责。"),
       h("p", { style: muted }, "改词条：更新插件即可，不需要重新构建前端。")
