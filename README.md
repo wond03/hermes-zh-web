@@ -16,6 +16,8 @@ wond03/hermes-zh-plugin
 
 勾上「安装后启用」→ 安装 → 刷新页面。
 
+> 安装完可能会提示「Custom (unreviewed) source — not from the Hermes catalog」，这是**来源提示**，不是安全拦截：插件会经过 Hermes 的安全扫描，扫描结果是通过的。点确认即可。
+
 **方式二：手动放目录**
 
 ```bash
@@ -79,7 +81,7 @@ python3 tools/translate_catalog.py   # 需要 DEEPSEEK_API_KEY，断点续跑
 2. 页面渲染后遍历文本节点与 `placeholder/title/aria-label`，精确匹配即替换
 3. 用 `MutationObserver` 跟进 React 后续渲染
 4. 跳过 `pre/code/input/textarea/终端/可编辑区`，文件名、日志、代码、输入内容不会被误翻
-5. 空闲时（`requestIdleCallback`）再加载 `dashboard/dist/catalog.js`（862 条插件简介），**不拖慢首屏**
+5. 空闲时（`requestIdleCallback`）再 fetch `dashboard/dist/catalog.json`（857 条插件简介），**不拖慢首屏**
 
 ## 只装插件够不够
 
@@ -96,6 +98,7 @@ python3 tools/translate_catalog.py   # 需要 DEEPSEEK_API_KEY，断点续跑
 
 - 只处理**已经渲染出来的文本**；登录页、组件结构与交互（手机输入条、上传按钮）不在能力范围内。
 - 插件市场简介为机器翻译，术语以原仓库说明为准；上游改了简介需要重跑一次翻译脚本。
+- 有 5 个插件的简介保留英文：它们的原文含 `~/.ssh`、`Credential Manager`、`sudo` 这类字样，Hermes 的安装安全扫描会把它们判为高危（哪怕只是说明文字），只好不收录。
 - 精确匹配，不做语义翻译：拼接出来的句子可能只翻一半。
 - `aria-label` 也会被翻译，屏幕阅读器读中文。
 
