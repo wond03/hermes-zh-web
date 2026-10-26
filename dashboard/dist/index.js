@@ -2424,6 +2424,20 @@
     var boxRef = R.useRef(null);
     var taRef = R.useRef(null);
 
+    // 终端那个隐藏 textarea 会自动抢焦点，手机上一进页面就弹键盘；
+    // 有了下方输入条就不需要它了：禁掉它的软键盘 + 挂载时收掉焦点
+    R.useEffect(function () {
+      function tame() {
+        var t = document.querySelector(".xterm-helper-textarea");
+        if (!t) return;
+        if (t.getAttribute("inputmode") !== "none") t.setAttribute("inputmode", "none");
+        if (document.activeElement === t) { try { t.blur(); } catch (e) {} }
+      }
+      tame();
+      var n = 0, timer = setInterval(function () { tame(); if (++n > 20) clearInterval(timer); }, 500);
+      return function () { clearInterval(timer); };
+    }, []);
+
     // 插槽在 SPA 里跨路由常驻，必须自己判断只在 /chat 显示，否则别的页面底部也挂着输入条
     var ps = R.useState(window.location.pathname), path = ps[0], setPath = ps[1];
     R.useEffect(function () {
@@ -2459,7 +2473,7 @@
     function pasteText(text) {
       var t = termTa();
       if (!t) return false;
-      t.focus();
+      // 不调用 focus()：手机上聚焦终端会弹键盘，paste 事件不需要焦点也能被 xterm 收到
       var dt = new DataTransfer();
       dt.setData("text/plain", text);
       t.dispatchEvent(new ClipboardEvent("paste", { clipboardData: dt, bubbles: true, cancelable: true }));
