@@ -1739,14 +1739,13 @@
   // 这些区域不翻译：终端、代码、输入框、编辑器
   var SKIP = "pre,code,textarea,input,select,option,script,style,.xterm,.xterm-rows,.xterm-screen,[contenteditable='true'],[data-no-zh]";
 
+  // 装了中文插件就是要中文：宿主语言是英文时同样生效，
+  // 否则"装了插件界面还是英文"，等于没装。不想用就停用插件。
   function isZh() {
-    var l = (document.documentElement.getAttribute("lang") || "").toLowerCase();
-    if (l) return l.indexOf("zh") === 0;
     try {
-      var s = localStorage.getItem("hermes-locale");
-      if (s) return String(s).toLowerCase().indexOf("zh") === 0;
+      if (window.localStorage.getItem("hermes:zh-force-en") === "1") return false;
     } catch (e) {}
-    return false;
+    return true;
   }
 
   // 带变量的动态文案用规则匹配
