@@ -2134,10 +2134,16 @@
     [/^(\d+) tasks? in this column$/i, "此列 $1 个任务"],
   ];
 
+  // 隐藏开关：只走机器翻译、不查内置词库（用来对比效果）
+  function dictOnly() {
+    try { return localStorage.getItem("hermes:zh-dict-off") === "1"; } catch (e) { return false; }
+  }
+
   function lookup(t) {
+    if (autoCache[t]) return autoCache[t];
+    if (dictOnly()) return null;
     var hit = DICT[t] || LOWER[t.toLowerCase()];
     if (hit) return hit;
-    if (autoCache[t]) return autoCache[t];
     for (var i = 0; i < RULES.length; i++) {
       if (RULES[i][0].test(t)) return t.replace(RULES[i][0], RULES[i][1]);
     }
@@ -2145,10 +2151,10 @@
   }
 
   function autoEligible(t, node) {
-    if (t.length < 5 || t.length > 60) return false;
+    if (t.length < 3 || t.length > 60) return false;
     // 允许英文 + 常见标点（em dash、弯引号、省略号），排除中文和表情
     if (!/^[\x20-\x7E\u2013\u2014\u2018\u2019\u201C\u201D\u00B7\u2026]+$/.test(t)) return false;
-    if (!/[A-Za-z]{3}/.test(t) || !/ /.test(t)) return false; // 至少两个词，避免单个标识符
+    if (!/[A-Za-z]{3}/.test(t)) return false;
     if (/[\/\\@#$%^&*{}\[\]<>|]|\d{4,}/.test(t)) return false;  // 路径/邮箱/长数字
     if (AUTO_BLACK.test(t)) return false;
     var el = node.parentElement;
