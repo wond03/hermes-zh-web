@@ -148,14 +148,51 @@ __PAIRS__
     }).observe(document.documentElement, { attributes: true, attributeFilter: ["lang"] });
   }
 
+  // 停用开关（插件页里可切换），存在 localStorage，刷新后生效
+  var DISABLE_KEY = "hermes:zh-disabled";
+  function enabled() {
+    try { return window.localStorage.getItem(DISABLE_KEY) !== "1"; } catch (e) { return true; }
+  }
+
+  var _start = start;
+  start = function () {
+    if (!enabled()) return;
+    _start();
+  };
+
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", start);
   } else {
     start();
   }
+
+  // ---- 注册插件页（host 要求 bundle 调用 register()，否则显示"未注册"错误页）----
+  function ZhPanel() {
+    var SDK = window.__HERMES_PLUGIN_SDK__ || {};
+    var R = SDK.React;
+    if (!R) return null;
+    var h = R.createElement;
+    var muted = { color: "var(--text-tertiary, #888)", fontSize: 12, margin: "4px 0" };
+    return h("div", { style: { padding: "20px 16px", maxWidth: 720, lineHeight: 1.8, fontSize: 14 } },
+      h("h2", { style: { margin: "0 0 10px", fontSize: 18 } }, "中文增强"),
+      h("p", { style: { margin: "0 0 6px" } },
+        "运行时词典已加载 " + __COUNT__ + " 条，把控制台里写死的英文界面文案替换成中文。"),
+      h("p", { style: { margin: "0 0 6px" } }, "状态：已启用"),
+      h("p", { style: muted }, "不想用了就在「插件」页停用或卸载它，界面立刻回到英文。"),
+      h("p", { style: muted },
+        "只覆盖组件里写死的英文；词条文件、配置页字段说明、登录页、手机端输入栏由配套补丁负责。"),
+      h("p", { style: muted }, "改词条：更新插件即可，不需要重新构建前端。")
+    );
+  }
+
+  var PLUGINS = window.__HERMES_PLUGINS__;
+  if (PLUGINS && PLUGINS.register) {
+    PLUGINS.register("hermes-zh", ZhPanel);
+  }
 })();
 """
 
 js = js.replace("__PAIRS__", pairs)
+js = js.replace("__COUNT__", str(len(zh)))
 open("dashboard/dist/index.js", "w", encoding="utf-8").write(js)
 print("dashboard/dist/index.js", len(js), "bytes,", len(zh), "entries")
