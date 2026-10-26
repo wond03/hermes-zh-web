@@ -6,7 +6,8 @@ zh = {k: v for k, v in zh.items() if len(k) >= 3 and k.strip() == k and k != v}
 
 # 插件市场的长简介体积大（约占词典 2/3），拆成按需加载的 catalog.js，避免拖慢首屏
 import os
-_cat = set(json.load(open("catalog_keys.json", encoding="utf-8"))) if os.path.exists("catalog_keys.json") else set()
+_catf = "../dict/catalog_zh.json"
+_cat = set(json.load(open(_catf, encoding="utf-8"))) if os.path.exists(_catf) else set()
 core = {k: v for k, v in zh.items() if k not in _cat}
 extra = {k: v for k, v in zh.items() if k in _cat}
 
