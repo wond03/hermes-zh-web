@@ -2970,5 +2970,7 @@
  "TENANT": "租户",
  "tenant": "租户",
  "ASSIGNEE": "负责人",
- "assignee": "负责人"
+ "assignee": "负责人",
+ "via basic": "基础认证",
+ "via oauth": "OAuth 登录"
 }

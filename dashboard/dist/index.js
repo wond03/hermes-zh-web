@@ -2067,6 +2067,8 @@
     "updates.parked_branch_strategy": "更新.暂存分支策略",
     "updates.pre_update_backup": "更新.更新前备份",
     "updates.refresh_cua_driver": "更新.刷新CUA驱动",
+    "via basic": "基础认证",
+    "via oauth": "OAuth 登录",
     "voice": "语音",
     "web": "网页",
     "windows, linux": "windows、linux",
@@ -2370,7 +2372,7 @@
     }
     return h("div", { style: { padding: "20px 16px", maxWidth: 720, lineHeight: 1.8, fontSize: 14 } },
       h("p", { style: { margin: "0 0 10px", fontSize: 15 } },
-        "已加载 " + 2925 + " 条词典 · 界面中文 · 运行中"),
+        "已加载 " + 2927 + " 条词典 · 界面中文 · 运行中"),
       h("button", {
         onClick: off,
         style: {
@@ -2379,11 +2381,11 @@
           color: "inherit", cursor: "pointer",
         },
       }, "停用中文（界面回到英文）"),
-      h("p", { style: muted }, st || "点一下会停用并刷新页面，界面立刻回到英文。想恢复：到「插件」页把 hermes-zh 启用后刷新。"),
+      h("p", { style: muted }, st || "点一下会停用并刷新页面，界面立刻回到英文。想恢复：到「插件」页把 hermes-zh-web 启用后刷新。"),
       h("hr", { style: { border: 0, borderTop: "1px solid var(--border, #333)", margin: "14px 0" } }),
       h("p", { style: { margin: "0 0 6px", fontWeight: 600 } }, "未收录文案自动翻译"),
       h("p", { style: muted },
-        "词库只有 " + 2925 + " 条，剩下的（第三方插件的按钮、新版本加的文案）可以走免费翻译模型补。带术语提示，翻一次就缓存在本机，不再重复请求。"),
+        "词库只有 " + 2927 + " 条，剩下的（第三方插件的按钮、新版本加的文案）可以走免费翻译模型补。带术语提示，翻一次就缓存在本机，不再重复请求。"),
       h("button", {
         onClick: function () {
           var next = !autoOn;
