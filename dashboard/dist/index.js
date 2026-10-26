@@ -2419,6 +2419,9 @@
     var cst = R.useState(false), showCmds = cst[0], setShowCmds = cst[1];
     var busy = R.useState(false), sending = busy[0], setSending = busy[1];
     var up = R.useState(""), upMsg = up[0], setUpMsg = up[1];
+    var mn = R.useState(false), showMenu = mn[0], setShowMenu = mn[1];
+    var camRef = R.useRef(null);
+    var vidRef = R.useRef(null);
     var imgRef = R.useRef(null);
     var fileRef = R.useRef(null);
     var boxRef = R.useRef(null);
@@ -2560,6 +2563,21 @@
       el.style.height = Math.min(180, Math.max(76, el.scrollHeight)) + "px";
     }
 
+    var tile = {
+      flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 6,
+      padding: "14px 6px", borderRadius: 10, border: "1px solid var(--border, #333)",
+      background: "var(--bg, #111)", color: "inherit", fontSize: 12, cursor: "pointer"
+    };
+    function cmdRow(icon, label, onClick) {
+      return h("button", {
+        onClick: onClick,
+        style: {
+          display: "flex", alignItems: "center", gap: 10, padding: "10px 6px",
+          background: "transparent", border: 0, color: "inherit", fontSize: 14, cursor: "pointer", textAlign: "left"
+        }
+      }, h("span", { style: { width: 22, textAlign: "center" } }, icon), h("span", null, label));
+    }
+
     var CMDS = ["/help", "/new", "/model", "/resume", "/compact", "/status", "/clear", "/image "];
 
     var btn = {
@@ -2602,12 +2620,40 @@
           background: "var(--bg-elevated, #1a1a1a)", color: "inherit", fontSize: 15, lineHeight: 1.5
         }
       }),
+      showMenu && h("div", {
+        style: {
+          position: "absolute", left: 10, right: 10, bottom: "76px", zIndex: 71,
+          background: "var(--bg-elevated, #1a1a1a)", border: "1px solid var(--border, #333)",
+          borderRadius: 12, padding: 12, display: "flex", flexDirection: "column", gap: 10,
+          boxShadow: "0 -8px 24px rgba(0,0,0,.35)"
+        }
+      },
+        h("div", { style: { display: "flex", gap: 10 } },
+          h("button", { style: tile, onClick: function () { setShowMenu(false); camRef.current && camRef.current.click(); } },
+            h("span", { style: { fontSize: 20 } }, "📷"), h("span", null, "拍照")),
+          h("button", { style: tile, onClick: function () { setShowMenu(false); imgRef.current && imgRef.current.click(); } },
+            h("span", { style: { fontSize: 20 } }, "🖼"), h("span", null, "照片 / 视频")),
+          h("button", { style: tile, onClick: function () { setShowMenu(false); fileRef.current && fileRef.current.click(); } },
+            h("span", { style: { fontSize: 20 } }, "📎"), h("span", null, "添加文件"))
+        ),
+        h("div", { style: { display: "flex", flexDirection: "column", gap: 2 } },
+          cmdRow("⌘", "常用命令", function () { setShowMenu(false); setShowCmds(true); }),
+          cmdRow("🎯", "技能", function () { setShowMenu(false); window.location.href = "/skills"; }),
+          cmdRow("⚙", "配置", function () { setShowMenu(false); window.location.href = "/config"; })
+        )
+      ),
       h("div", { style: { display: "flex", gap: 6, alignItems: "center" } },
-        h("button", { style: btn, title: "常用命令", onClick: function () { setShowCmds(!showCmds); } }, "⌘"),
-        h("button", { style: btn, title: "发送图片", onClick: function () { imgRef.current && imgRef.current.click(); } }, "图"),
-        h("button", { style: btn, title: "发送文件", onClick: function () { fileRef.current && fileRef.current.click(); } }, "件"),
+        h("button", {
+          style: Object.assign({}, btn, { fontSize: 18, padding: "6px 12px" }),
+          title: "添加",
+          onClick: function () { setShowMenu(!showMenu); }
+        }, showMenu ? "×" : "+"),
         h("input", {
-          ref: imgRef, type: "file", accept: "image/*", style: { display: "none" },
+          ref: camRef, type: "file", accept: "image/*", capture: "environment", style: { display: "none" },
+          onChange: function (e) { var f = e.target.files && e.target.files[0]; uploadImage(f); e.target.value = ""; }
+        }),
+        h("input", {
+          ref: imgRef, type: "file", accept: "image/*,video/*", style: { display: "none" },
           onChange: function (e) { var f = e.target.files && e.target.files[0]; uploadImage(f); e.target.value = ""; }
         }),
         h("input", {
