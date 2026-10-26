@@ -83,6 +83,18 @@ python3 tools/translate_catalog.py   # 需要 DEEPSEEK_API_KEY，断点续跑
 4. 跳过 `pre/code/input/textarea/终端/可编辑区`，文件名、日志、代码、输入内容不会被误翻
 5. 空闲时（`requestIdleCallback`）再 fetch `dashboard/dist/catalog.json`（857 条插件简介），**不拖慢首屏**
 
+## 未收录文案自动翻译（可选，默认关）
+
+词库覆盖不到的地方（第三方插件的按钮、上游新加的文案），可以在「中文增强」页打开**自动翻译**：
+
+- 接口：[bilibili/Index-Translate](https://github.com/bilibili/Index-Translate) 的公开端点（35B 翻译模型，免费、无需 key、允许跨域）
+- 带术语提示（board=看板、triage=待分诊、worker=执行器……），一次批量 12 条
+- 只翻**短英文句**：跳过品牌名（Anthropic、DeepSeek 等）、聊天内容、日志、文件名、输入框
+- 结果缓存在浏览器 `localStorage`，翻一次不再请求
+- 失败静默降级回英文，不影响使用
+
+打开方式：插件页 →「中文增强」→「开启自动翻译」。介意文本发送到第三方就别开。
+
 ## 只装插件够不够
 
 | 场景 | 只装插件 | 说明 |

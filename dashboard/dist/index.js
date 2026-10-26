@@ -2085,7 +2085,13 @@
   // ---- 兜底机器翻译：词库没收录的界面文案，按需翻译并缓存（默认关闭）----
   var AUTO_KEY = "hermes:zh-auto";
   var AUTO_CACHE_KEY = "hermes:zh-auto-cache";
-  var AUTO_MAX = 40;                       // 单页最多翻多少条，防止额度被刷光
+  var AUTO_MAX = 40;                       // 单页最多翻多少条
+  var AUTO_API = "https://index-translate.bilibili.com/v1/chat/completions";
+  var AUTO_MODEL = "Index-Translate-35B-A3B";
+  var AUTO_PROMPT = "下面的英文是 Hermes Agent 网页控制台的界面文案，请逐条翻译成简体中文。"
+    + "要求：1) 只输出 JSON 数组，元素是译文，条数与顺序和输入完全一致；2) 不要任何解释；"
+    + "3) 按软件界面习惯翻译术语（board=看板，triage=待分诊，worker=执行器，in-flight=处理中，"
+    + "profile=配置档，session=会话，gateway=网关，skill=技能，hook=钩子）；4) 品牌名保留英文。\n\n输入：";
   var autoCache = {};
   try { autoCache = JSON.parse(localStorage.getItem(AUTO_CACHE_KEY) || "{}") || {}; } catch (e) { autoCache = {}; }
   var autoQueue = [], autoBusy = false, autoCount = 0;
@@ -2140,7 +2146,8 @@
 
   function autoEligible(t, node) {
     if (t.length < 5 || t.length > 60) return false;
-    if (!/^[\x20-\x7E]+$/.test(t)) return false;          // 只处理纯 ASCII
+    // 允许英文 + 常见标点（em dash、弯引号、省略号），排除中文和表情
+    if (!/^[\x20-\x7E\u2013\u2014\u2018\u2019\u201C\u201D\u00B7\u2026]+$/.test(t)) return false;
     if (!/[A-Za-z]{3}/.test(t) || !/ /.test(t)) return false; // 至少两个词，避免单个标识符
     if (/[\/\\@#$%^&*{}\[\]<>|]|\d{4,}/.test(t)) return false;  // 路径/邮箱/长数字
     if (AUTO_BLACK.test(t)) return false;
@@ -2161,27 +2168,42 @@
   function drainAuto() {
     if (!autoQueue.length) { autoBusy = false; return; }
     autoBusy = true;
-    var item = autoQueue.shift();
-    if (!item.n.isConnected) { drainAuto(); return; }
-    var url = "https://api.mymemory.translated.net/get?langpair=en|zh-CN&q=" + encodeURIComponent(item.t);
-    fetch(url, { mode: "cors" })
-      .then(function (r) { return r.json(); })
+    var batch = autoQueue.splice(0, 12).filter(function (x) { return x.n.isConnected; });
+    if (!batch.length) { autoBusy = false; return; }
+    var texts = batch.map(function (x) { return x.t; });
+    var body = {
+      model: AUTO_MODEL,
+      messages: [{ role: "user", content: AUTO_PROMPT + JSON.stringify(texts) }],
+      temperature: 0,
+      max_tokens: 800,
+      chat_template_kwargs: { enable_thinking: false }
+    };
+    fetch(AUTO_API, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body)
+    })
+      .then(function (r) { return r.ok ? r.json() : null; })
       .then(function (d) {
-        var v = d && d.responseData && d.responseData.translatedText;
-        if (!v) return;
-        v = String(v).trim();
-        if (!v || /MYMEMORY WARNING|QUERY LENGTH LIMIT|INVALID/i.test(v)) return;
-        if (v.toLowerCase() === item.t.toLowerCase()) return;
-        // 译文里若没有中文字符，说明没翻成功
-        if (!/[\u4e00-\u9fff]/.test(v)) return;
-        autoCache[item.t] = v;
-        autoCount++;
-        if (item.n.isConnected) item.n.nodeValue = v;
+        var txt = d && d.choices && d.choices[0] && d.choices[0].message && d.choices[0].message.content;
+        if (!txt) return;
+        txt = String(txt).trim().replace(/^```(?:json)?/i, "").replace(/```$/, "").trim();
+        var arr;
+        try { arr = JSON.parse(txt); } catch (e) { return; }
+        if (!Array.isArray(arr) || arr.length !== texts.length) return;
+        for (var i = 0; i < batch.length; i++) {
+          var v = String(arr[i] == null ? "" : arr[i]).trim();
+          if (!v || !/[\u4e00-\u9fff]/.test(v)) continue;
+          if (v.length > 200) continue;
+          autoCache[texts[i]] = v;
+          autoCount++;
+          if (batch[i].n.isConnected) batch[i].n.nodeValue = v;
+        }
       })
       .catch(function () {})
       .then(function () {
         try { localStorage.setItem(AUTO_CACHE_KEY, JSON.stringify(autoCache)); } catch (e) {}
-        setTimeout(drainAuto, 400);
+        setTimeout(drainAuto, 150);
       });
   }
 
@@ -2356,7 +2378,7 @@
       h("hr", { style: { border: 0, borderTop: "1px solid var(--border, #333)", margin: "14px 0" } }),
       h("p", { style: { margin: "0 0 6px", fontWeight: 600 } }, "未收录文案自动翻译"),
       h("p", { style: muted },
-        "词库只有 " + 2925 + " 条，剩下的（第三方插件的按钮、新版本加的文案）可以用免费翻译接口临时补上。结果存在本机，翻一次就不再请求。"),
+        "词库只有 " + 2925 + " 条，剩下的（第三方插件的按钮、新版本加的文案）可以走免费翻译模型补。带术语提示，翻一次就缓存在本机，不再重复请求。"),
       h("button", {
         onClick: function () {
           var next = !autoOn;
@@ -2373,7 +2395,7 @@
       h("p", { style: muted },
         autoOn
           ? "已开启。品牌名（Anthropic、DeepSeek 等）不会翻；聊天内容、日志、文件名、输入框不会碰。翻译结果缓存在本机 localStorage。"
-          : "开启后会把界面上没收录的英文短句发给 api.mymemory.translated.net（免费接口）。介意隐私或离线环境就别开。"),
+          : "开启后会把界面上没收录的英文短句发给 bilibili Index-Translate（公开免费接口，35B 翻译模型），一次 12 条批量翻。介意隐私或离线环境就别开。"),
       h("p", { style: muted },
         "只覆盖组件里写死的英文；词条文件、配置页字段说明、登录页、手机端输入栏由配套补丁负责。"),
       h("p", { style: muted }, "改词条：更新插件即可，不需要重新构建前端。")
