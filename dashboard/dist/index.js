@@ -2409,7 +2409,7 @@
     );
   }
 
-  // ---- 移动端输入条：手机上没有可见输入框，这里补一个 ----
+  // ---- 手机端输入条：官方移动端没有可见输入框，这里补一条 ----
   function ChatDock() {
     var SDK = window.__HERMES_PLUGIN_SDK__ || {};
     var R = SDK.React;
@@ -2418,39 +2418,34 @@
     var st = R.useState(""), val = st[0], setVal = st[1];
     var cst = R.useState(false), showCmds = cst[0], setShowCmds = cst[1];
     var busy = R.useState(false), sending = busy[0], setSending = busy[1];
-    var fileRef = R.useRef(null);
     var up = R.useState(""), upMsg = up[0], setUpMsg = up[1];
+    var imgRef = R.useRef(null);
+    var fileRef = R.useRef(null);
+    var boxRef = R.useRef(null);
+    var taRef = R.useRef(null);
 
-    function uploadImage(file) {
-      if (!file) return;
-      setUpMsg("上传中…");
-      var reader = new FileReader();
-      reader.onload = function () {
-        var dataUrl = String(reader.result || "");
-        fetch("/api/chat/image-upload", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "X-Hermes-Session-Token": window.__HERMES_SESSION_TOKEN__ || ""
-          },
-          credentials: "include",
-          body: JSON.stringify({ data_url: dataUrl, filename: file.name || "image.png" })
-        })
-          .then(function (r) { return r.ok ? r.json() : r.json().then(function (e) { throw new Error(e.detail || "上传失败"); }); })
-          .then(function (d) {
-            if (!d || !d.path) throw new Error("没拿到路径");
-            setVal("/image " + d.path + " ");
-            setUpMsg("");
-          })
-          .catch(function (e) { setUpMsg(String(e.message || e).slice(0, 40)); });
+    // 键盘弹出/收起时，把输入条贴在可视区域底部，避免整页跳动
+    R.useEffect(function () {
+      var vv = window.visualViewport;
+      var el = boxRef.current;
+      if (!vv || !el) return;
+      function sync() {
+        var gap = Math.max(0, window.innerHeight - vv.height - vv.offsetTop);
+        el.style.transform = "translateY(-" + gap + "px)";
+      }
+      vv.addEventListener("resize", sync);
+      vv.addEventListener("scroll", sync);
+      sync();
+      return function () {
+        vv.removeEventListener("resize", sync);
+        vv.removeEventListener("scroll", sync);
       };
-      reader.readAsDataURL(file);
-    }
+    }, []);
 
-    function ta() { return document.querySelector(".xterm-helper-textarea"); }
+    function termTa() { return document.querySelector(".xterm-helper-textarea"); }
 
     function pasteText(text) {
-      var t = ta();
+      var t = termTa();
       if (!t) return false;
       t.focus();
       var dt = new DataTransfer();
@@ -2460,7 +2455,7 @@
     }
 
     function pressEnter() {
-      var t = ta();
+      var t = termTa();
       if (!t) return;
       ["keydown", "keyup"].forEach(function (kind) {
         t.dispatchEvent(new KeyboardEvent(kind, { key: "Enter", code: "Enter", keyCode: 13, which: 13, bubbles: true }));
@@ -2475,71 +2470,145 @@
       setTimeout(function () {
         pressEnter();
         setVal("");
+        fit();
         setSending(false);
       }, 80);
+    }
+
+    function authHeaders(extra) {
+      var hh = extra || {};
+      var tok = window.__HERMES_SESSION_TOKEN__;
+      if (tok) hh["X-Hermes-Session-Token"] = tok;
+      return hh;
+    }
+
+    function uploadImage(file) {
+      if (!file) return;
+      setUpMsg("图片上传中…");
+      var reader = new FileReader();
+      reader.onload = function () {
+        fetch("/api/chat/image-upload", {
+          method: "POST",
+          headers: authHeaders({ "Content-Type": "application/json" }),
+          credentials: "include",
+          body: JSON.stringify({ data_url: String(reader.result || ""), filename: file.name || "image.png" })
+        })
+          .then(function (r) { return r.ok ? r.json() : r.json().then(function (e) { throw new Error(e.detail || "上传失败"); }); })
+          .then(function (d) {
+            if (!d || !d.path) throw new Error("没拿到路径");
+            setVal(function (old) { return (old ? old + "\n" : "") + "/image " + d.path; });
+            setUpMsg("图片已附上，点发送");
+            fit();
+          })
+          .catch(function (e) { setUpMsg("失败：" + String(e.message || e).slice(0, 40)); });
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function uploadFile(file) {
+      if (!file) return;
+      setUpMsg("文件上传中…");
+      var stamp = new Date().toISOString().replace(/[-:T.]/g, "").slice(0, 14);
+      var safe = String(file.name || "file").replace(/[^\w.\-]+/g, "_");
+      var form = new FormData();
+      form.append("file", file, file.name || "file");
+      form.append("path", "~/.hermes/uploads/" + stamp + "_" + safe);
+      form.append("overwrite", "true");
+      fetch("/api/files/upload-stream", {
+        method: "POST", headers: authHeaders(), credentials: "include", body: form
+      })
+        .then(function (r) { return r.ok ? r.json() : r.json().then(function (e) { throw new Error(e.detail || "上传失败"); }); })
+        .then(function (d) {
+          if (!d || !d.path) throw new Error("没拿到路径");
+          setVal(function (old) { return (old ? old + "\n" : "") + d.path; });
+          setUpMsg("文件已上传，点发送");
+          fit();
+        })
+        .catch(function (e) { setUpMsg("失败：" + String(e.message || e).slice(0, 40)); });
+    }
+
+    function fit() {
+      var el = taRef.current;
+      if (!el) return;
+      el.style.height = "auto";
+      el.style.height = Math.min(180, Math.max(76, el.scrollHeight)) + "px";
     }
 
     var CMDS = ["/help", "/new", "/model", "/resume", "/compact", "/status", "/clear", "/image "];
 
     var btn = {
-      padding: "8px 12px", borderRadius: 8, border: "1px solid var(--border, #3a3a3a)",
-      background: "transparent", color: "inherit", fontSize: 13, cursor: "pointer", whiteSpace: "nowrap"
+      padding: "9px 11px", borderRadius: 8, border: "1px solid var(--border, #3a3a3a)",
+      background: "transparent", color: "inherit", fontSize: 13, cursor: "pointer", whiteSpace: "nowrap", lineHeight: 1
     };
 
     return h("div", {
+      ref: boxRef,
       style: {
-        position: "sticky", bottom: 0, left: 0, right: 0, zIndex: 40,
+        position: "fixed", left: 0, right: 0, bottom: 0, zIndex: 70,
         background: "var(--bg, #111)", borderTop: "1px solid var(--border, #333)",
-        padding: "8px 10px calc(8px + env(safe-area-inset-bottom))", display: "flex", flexDirection: "column", gap: 8
+        padding: "8px 10px calc(8px + env(safe-area-inset-bottom))",
+        display: "flex", flexDirection: "column", gap: 6,
+        transition: "transform 0.12s ease-out"
       }
     },
-      showCmds && h("div", { style: { display: "flex", flexWrap: "wrap", gap: 6 } },
+      showCmds && h("div", { style: { display: "flex", flexWrap: "wrap", gap: 6, paddingBottom: 2 } },
         CMDS.map(function (c) {
-          return h("button", {
-            key: c, style: btn,
-            onClick: function () { setVal(c); setShowCmds(false); }
-          }, c.trim());
+          return h("button", { key: c, style: btn, onClick: function () { setVal(c); setShowCmds(false); taRef.current && taRef.current.focus(); } }, c.trim());
         })
       ),
       upMsg && h("p", { style: { margin: "0 2px", fontSize: 12, color: "var(--text-tertiary, #888)" } }, upMsg),
-      h("div", { style: { display: "flex", gap: 8, alignItems: "flex-end" } },
-        h("button", {
-          style: btn, title: "常用命令",
-          onClick: function () { setShowCmds(!showCmds); }
-        }, "⌘"),
-        h("button", {
-          style: Object.assign({}, btn, { padding: "8px 10px" }), title: "发送图片",
-          onClick: function () { if (fileRef.current) fileRef.current.click(); }
-        }, "图"),
+      h("textarea", {
+        ref: taRef,
+        value: val,
+        rows: 1,
+        placeholder: "输入消息，Enter 换行",
+        onChange: function (e) { setVal(e.target.value); fit(); },
+        onKeyDown: function (e) {
+          if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) { e.preventDefault(); send(); }
+        },
+        style: {
+          width: "100%", boxSizing: "border-box", resize: "none",
+          minHeight: 76, maxHeight: 180, padding: "10px 12px",
+          borderRadius: 8, border: "1px solid var(--border, #3a3a3a)",
+          background: "var(--bg-elevated, #1a1a1a)", color: "inherit", fontSize: 15, lineHeight: 1.5
+        }
+      }),
+      h("div", { style: { display: "flex", gap: 6, alignItems: "center" } },
+        h("button", { style: btn, title: "常用命令", onClick: function () { setShowCmds(!showCmds); } }, "⌘"),
+        h("button", { style: btn, title: "发送图片", onClick: function () { imgRef.current && imgRef.current.click(); } }, "图"),
+        h("button", { style: btn, title: "发送文件", onClick: function () { fileRef.current && fileRef.current.click(); } }, "件"),
         h("input", {
-          ref: fileRef, type: "file", accept: "image/*", style: { display: "none" },
-          onChange: function (e) {
-            var f = e.target.files && e.target.files[0];
-            uploadImage(f);
-            e.target.value = "";
-          }
+          ref: imgRef, type: "file", accept: "image/*", style: { display: "none" },
+          onChange: function (e) { var f = e.target.files && e.target.files[0]; uploadImage(f); e.target.value = ""; }
         }),
-        h("textarea", {
-          value: val,
-          rows: 1,
-          placeholder: "输入消息，回车发送",
-          onChange: function (e) { setVal(e.target.value); },
-          onKeyDown: function (e) {
-            if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); }
-          },
-          style: {
-            flex: 1, resize: "none", maxHeight: 96, minHeight: 38, padding: "9px 10px",
-            borderRadius: 8, border: "1px solid var(--border, #3a3a3a)",
-            background: "var(--bg-elevated, #1a1a1a)", color: "inherit", fontSize: 15, lineHeight: 1.4
-          }
+        h("input", {
+          ref: fileRef, type: "file", style: { display: "none" },
+          onChange: function (e) { var f = e.target.files && e.target.files[0]; uploadFile(f); e.target.value = ""; }
         }),
+        h("div", { style: { flex: 1 } }),
         h("button", {
-          style: Object.assign({}, btn, { background: "var(--accent, #3b82f6)", color: "#fff", borderColor: "transparent" }),
+          style: Object.assign({}, btn, { background: "var(--accent, #3b82f6)", color: "#fff", borderColor: "transparent", padding: "10px 22px", fontSize: 14 }),
           onClick: send, disabled: sending
         }, sending ? "…" : "发送")
       )
     );
   }
+
+  // 官方「复制上一条回复」浮在终端右下角，会挡住内容；输入条占了底部，把它藏掉
+  (function hideCopyPill() {
+    function apply() {
+      var nodes = document.querySelectorAll("button");
+      for (var i = 0; i < nodes.length; i++) {
+        var t = (nodes[i].innerText || "").trim();
+        if (t && /^复制上一条|Copy last/i.test(t)) {
+          nodes[i].setAttribute("data-zh-hidden", "1");
+          nodes[i].style.display = "none";
+        }
+      }
+    }
+    apply();
+    setInterval(apply, 2000);
+  })();
 
   var PLUGINS = window.__HERMES_PLUGINS__;
   if (PLUGINS && PLUGINS.register) {

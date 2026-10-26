@@ -88,12 +88,15 @@ python3 tools/translate_catalog.py   # 需要 DEEPSEEK_API_KEY，断点续跑
 `/chat` 页底部会多一条输入栏（官方移动端没有可见输入框）：
 
 ```
-⌘   图   [ 输入消息，回车发送 ]   发送
+[ 输入消息，Enter 换行                    ]
+⌘   图   件                              发送
 ```
 
 - **⌘** 常用命令面板：`/help` `/new` `/model` `/resume` `/compact` `/status` `/clear` `/image`
 - **图** 选图/拍照 → 上传到 `HERMES_HOME/cache/images/` → 自动填入 `/image <路径>`
-- **发送** 把文字送进终端并回车
+- **件** 任意文件 → 上传到 `HERMES_HOME/uploads/` → 自动填入绝对路径
+- **Enter 换行**，**Ctrl/⌘ + Enter** 或点「发送」才提交；输入框默认 3 行高，随内容长到 8 行
+- 输入条贴在可视区域底部（`visualViewport` 跟随键盘），并隐藏了官方那个挡住的「复制上一条回复」浮标
 
 实现方式：往官方 `chat:bottom` 插槽渲染输入条，发送时用 `paste` 事件把文本注入终端的隐藏输入框（xterm 的 `.xterm-helper-textarea`），再补一个回车。**不依赖官方的发送 API**（SDK 没有暴露）。
 
