@@ -2960,5 +2960,10 @@
  "Settings": "设置",
  "New board": "新建看板",
  "Anthropic Account": "Anthropic 账户",
- "Board settings": "看板设置"
+ "Board settings": "看板设置",
+ "Board": "看板",
+ "Boards": "看板",
+ "board": "看板",
+ "Target Copper": "目标铜牌",
+ "Add task": "添加任务"
 }

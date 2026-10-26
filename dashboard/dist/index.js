@@ -53,6 +53,7 @@
     "Add preset": "添加预设",
     "Add reference model": "添加参考模型",
     "Add server": "添加服务器",
+    "Add task": "添加任务",
     "Advanced fields": "高级字段",
     "Agent Autonomy": "代理自主性",
     "Agent → Agent Cache → Idle Ttl Secs": "代理 → 代理缓存 → 空闲 TTL 秒数",
@@ -321,8 +322,10 @@
     "Bend files to your will with targeted patches.": "用定向补丁让文件随你心意",
     "Better Stack: logs, uptime monitors, incidents, and status pages.": "Better Stack：日志、正常运行时间监控、事件和状态页面。",
     "Blueprints": "蓝图",
+    "Board": "看板",
     "Board settings": "看板设置",
     "Board settings — name, description, and the default project directory new tasks inherit": "Board 设置 — 名称、描述，以及新任务默认继承的项目目录",
+    "Boards": "看板",
     "Boards let you separate unrelated streams of work": "Board 可将互不相关的工作流分开",
     "Boards, items, docs, and workflows in monday.com.": "monday.com 中的看板、项目、文档和工作流",
     "Borrow and refresh the Codex CLI / Claude Code logins when Hermes has no usable login of its own. Off: Hermes uses only its own logins (`hermes auth add <provider>`).": "当 Hermes 自身没有可用登录时，借用并刷新 Codex CLI / Claude Code 的登录。关闭：Hermes 只使用自己的登录（`hermes auth add <provider>`）。",
@@ -1712,6 +1715,7 @@
     "TDD: enforce RED-GREEN-REFACTOR, tests before code.": "TDD：强制红-绿-重构，测试先于代码。",
     "Talk to Hermes over SimpleX Chat via a local simplex-chat daemon.": "通过本地 simplex-chat 守护进程在 SimpleX Chat 上与 Hermes 对话",
     "Talk to Hermes through an IMAP/SMTP mailbox.": "通过 IMAP/SMTP 邮箱与 Hermes 对话",
+    "Target Copper": "目标铜牌",
     "Task/context id used as the cron / notification delivery target for deliver=a2a.": "用作 deliver=a2a 时 cron / 通知投递目标任务/上下文 id。",
     "Tasks, docs, and workspaces in ClickUp.": "ClickUp 中的任务、文档和工作区。",
     "Tasks, projects, and goals from your Asana workspace.": "来自 Asana 工作区的任务、项目和目标。",
@@ -2001,6 +2005,7 @@
     "Your MCP servers (": "您的 MCP 服务器（",
     "applies to new sessions": "对新会话生效",
     "automation": "自动化",
+    "board": "看板",
     "browser-use:": "browser-use：",
     "built-in only": "仅内置",
     "channels configured. Credentials are written to": "渠道已配置。凭据写入",
@@ -2072,6 +2077,20 @@
   var LOWER = {};
   for (var k in DICT) LOWER[k.toLowerCase()] = DICT[k];
 
+  // ---- 兜底机器翻译：词库没收录的界面文案，按需翻译并缓存（默认关闭）----
+  var AUTO_KEY = "hermes:zh-auto";
+  var AUTO_CACHE_KEY = "hermes:zh-auto-cache";
+  var AUTO_MAX = 40;                       // 单页最多翻多少条，防止额度被刷光
+  var autoCache = {};
+  try { autoCache = JSON.parse(localStorage.getItem(AUTO_CACHE_KEY) || "{}") || {}; } catch (e) { autoCache = {}; }
+  var autoQueue = [], autoBusy = false, autoCount = 0;
+  // 品牌/专名不翻：机器翻译会把 Anthropic 译成"人类学"、DeepSeek 译成"深度搜索"
+  var AUTO_BLACK = /^(Anthropic|DeepSeek|OpenAI|Nous|Nous Portal|Hermes|MCP|API|CLI|JSON|SQLite|GitHub|Docker|Python|Node|Kanban|Discord|Slack|Telegram|Matrix|Mattermost|OAuth|Webhook|Linux|macOS|Windows|Gemini|Kimi|Moonshot|MiniMax|Hugging Face|GLM|Bedrock|Vertex|Supabase|Airtable|OpenRouter|DashScope|Qwen|Grok)$/i;
+
+  function autoOn() {
+    try { return localStorage.getItem(AUTO_KEY) === "1"; } catch (e) { return false; }
+  }
+
   // 这些区域不翻译：终端、代码、输入框、编辑器
   var SKIP = "pre,code,textarea,input,select,option,script,style,.xterm,.xterm-rows,.xterm-screen,[contenteditable='true'],[data-no-zh]";
 
@@ -2107,10 +2126,58 @@
   function lookup(t) {
     var hit = DICT[t] || LOWER[t.toLowerCase()];
     if (hit) return hit;
+    if (autoCache[t]) return autoCache[t];
     for (var i = 0; i < RULES.length; i++) {
       if (RULES[i][0].test(t)) return t.replace(RULES[i][0], RULES[i][1]);
     }
     return null;
+  }
+
+  function autoEligible(t, node) {
+    if (t.length < 5 || t.length > 60) return false;
+    if (!/^[\x20-\x7E]+$/.test(t)) return false;          // 只处理纯 ASCII
+    if (!/[A-Za-z]{3}/.test(t) || !/ /.test(t)) return false; // 至少两个词，避免单个标识符
+    if (/[\/\\@#$%^&*{}\[\]<>|]|\d{4,}/.test(t)) return false;  // 路径/邮箱/长数字
+    if (AUTO_BLACK.test(t)) return false;
+    var el = node.parentElement;
+    if (!el || !el.closest) return false;
+    if (el.closest("pre,code,textarea,input,select,option,.xterm,[contenteditable='true'],[class*=message],[class*=prose],[class*=markdown],[data-no-zh]")) return false;
+    return /^(BUTTON|A|LABEL|TH|TD|SPAN|DIV|P|LI|H[1-6]|SMALL|STRONG|EM|DT|DD)$/.test(el.tagName);
+  }
+
+  function queueAuto(node, t) {
+    if (!autoOn() || autoCount > AUTO_MAX || autoQueue.length >= 15) return;
+    if (autoCache[t] && node.nodeValue !== autoCache[t]) { node.nodeValue = autoCache[t]; return; }
+    if (!autoEligible(t, node)) return;
+    autoQueue.push({ n: node, t: t });
+    if (!autoBusy) setTimeout(drainAuto, 350);
+  }
+
+  function drainAuto() {
+    if (!autoQueue.length) { autoBusy = false; return; }
+    autoBusy = true;
+    var item = autoQueue.shift();
+    if (!item.n.isConnected) { drainAuto(); return; }
+    var url = "https://api.mymemory.translated.net/get?langpair=en|zh-CN&q=" + encodeURIComponent(item.t);
+    fetch(url, { mode: "cors" })
+      .then(function (r) { return r.json(); })
+      .then(function (d) {
+        var v = d && d.responseData && d.responseData.translatedText;
+        if (!v) return;
+        v = String(v).trim();
+        if (!v || /MYMEMORY WARNING|QUERY LENGTH LIMIT|INVALID/i.test(v)) return;
+        if (v.toLowerCase() === item.t.toLowerCase()) return;
+        // 译文里若没有中文字符，说明没翻成功
+        if (!/[\u4e00-\u9fff]/.test(v)) return;
+        autoCache[item.t] = v;
+        autoCount++;
+        if (item.n.isConnected) item.n.nodeValue = v;
+      })
+      .catch(function () {})
+      .then(function () {
+        try { localStorage.setItem(AUTO_CACHE_KEY, JSON.stringify(autoCache)); } catch (e) {}
+        setTimeout(drainAuto, 400);
+      });
   }
 
   function skipped(node) {
@@ -2127,9 +2194,9 @@
     if (!raw) return;
     var t = raw.trim();
     if (!t || t.length > 2000) return;
-    var hit = lookup(t);
-    if (!hit) return;
     if (skipped(node)) return;
+    var hit = lookup(t);
+    if (!hit) { queueAuto(node, t); return; }
     node.nodeValue = raw.replace(t, hit);
   }
 
@@ -2254,6 +2321,9 @@
     if (!R) return null;
     var h = R.createElement;
     var box = R.useState(""), st = box[0], setSt = box[1];
+    var a = R.useState(function () {
+      try { return window.localStorage.getItem("hermes:zh-auto") === "1"; } catch (e) { return false; }
+    }), autoOn = a[0], setAutoOn = a[1];
     var muted = { color: "var(--text-tertiary, #888)", fontSize: 12, margin: "4px 0" };
     function off() {
       setSt("正在停用…");
@@ -2267,7 +2337,7 @@
     return h("div", { style: { padding: "20px 16px", maxWidth: 720, lineHeight: 1.8, fontSize: 14 } },
       h("h2", { style: { margin: "0 0 10px", fontSize: 18 } }, "中文增强"),
       h("p", { style: { margin: "0 0 6px" } },
-        "运行时词典已加载 " + 2915 + " 条，把控制台里写死的英文界面文案替换成中文。"),
+        "运行时词典已加载 " + 2920 + " 条，把控制台里写死的英文界面文案替换成中文。"),
       h("p", { style: { margin: "0 0 6px" } }, "状态：已启用"),
       h("button", {
         onClick: off,
@@ -2278,6 +2348,27 @@
         },
       }, "停用中文（界面回到英文）"),
       h("p", { style: muted }, st || "点一下会停用并刷新页面，界面立刻回到英文。想恢复：到「插件」页把 hermes-zh 启用后刷新。"),
+      h("hr", { style: { border: 0, borderTop: "1px solid var(--border, #333)", margin: "14px 0" } }),
+      h("p", { style: { margin: "0 0 6px", fontWeight: 600 } }, "未收录文案自动翻译"),
+      h("p", { style: muted },
+        "词库只有 " + 2920 + " 条，剩下的（第三方插件的按钮、新版本加的文案）可以用免费翻译接口临时补上。结果存在本机，翻一次就不再请求。"),
+      h("button", {
+        onClick: function () {
+          var next = !autoOn;
+          setAutoOn(next);
+          try { window.localStorage.setItem("hermes:zh-auto", next ? "1" : "0"); } catch (e) {}
+          setTimeout(function () { location.reload(); }, 150);
+        },
+        style: {
+          margin: "4px 0 8px", padding: "6px 14px", borderRadius: 6, fontSize: 13,
+          border: "1px solid var(--border, #444)", background: "transparent",
+          color: "inherit", cursor: "pointer",
+        },
+      }, autoOn ? "已开启 · 点此关闭" : "开启自动翻译"),
+      h("p", { style: muted },
+        autoOn
+          ? "已开启。品牌名（Anthropic、DeepSeek 等）不会翻；聊天内容、日志、文件名、输入框不会碰。翻译结果缓存在本机 localStorage。"
+          : "开启后会把界面上没收录的英文短句发给 api.mymemory.translated.net（免费接口）。介意隐私或离线环境就别开。"),
       h("p", { style: muted },
         "只覆盖组件里写死的英文；词条文件、配置页字段说明、登录页、手机端输入栏由配套补丁负责。"),
       h("p", { style: muted }, "改词条：更新插件即可，不需要重新构建前端。")
