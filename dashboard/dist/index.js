@@ -2362,10 +2362,8 @@
       }).catch(function (e) { setSt("停用失败：" + e); });
     }
     return h("div", { style: { padding: "20px 16px", maxWidth: 720, lineHeight: 1.8, fontSize: 14 } },
-      h("h2", { style: { margin: "0 0 10px", fontSize: 18 } }, "中文增强"),
-      h("p", { style: { margin: "0 0 6px" } },
-        "运行时词典已加载 " + 2925 + " 条，把控制台里写死的英文界面文案替换成中文。"),
-      h("p", { style: { margin: "0 0 6px" } }, "状态：已启用"),
+      h("p", { style: { margin: "0 0 10px", fontSize: 15 } },
+        "已加载 " + 2925 + " 条词典 · 界面中文 · 运行中"),
       h("button", {
         onClick: off,
         style: {

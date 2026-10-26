@@ -7,6 +7,6 @@
   "entry": "dist/index.js",
   "tab": {
     "path": "/hermes-zh",
-    "hidden": true
+    "position": "end"
   }
 }
