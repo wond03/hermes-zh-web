@@ -174,10 +174,10 @@ __PAIRS__
     window.__HERMES_ZH_EXTRA_LOADED__ = true;
     var me = document.currentScript && document.currentScript.src;
     var base = me ? me.replace(/[^/]+$/, "") : "/dashboard-plugins/hermes-zh/dist/";
-    var s = document.createElement("script");
-    s.src = base + "catalog.js";
-    s.async = true;
-    document.head.appendChild(s);
+    fetch(base + "catalog.json")
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (obj) { if (obj) window.__HERMES_ZH_MERGE__(obj); })
+      .catch(function () {});
   }
 
   if (document.readyState === "complete") {
@@ -255,6 +255,6 @@ js = js.replace("__COUNT__", str(len(zh)))
 open("../dashboard/dist/index.js", "w", encoding="utf-8").write(js)
 print("dist/index.js", len(js), "chars,", len(core), "core entries")
 
-cat_js = "/* 插件市场简介词典（按需加载，由 index.js 空闲时注入） */\nwindow.__HERMES_ZH_MERGE__ && window.__HERMES_ZH_MERGE__({\n" + _pairs(extra) + "\n});\n"
-open("../dashboard/dist/catalog.js", "w", encoding="utf-8").write(cat_js)
-print("dist/catalog.js", len(cat_js), "chars,", len(extra), "catalog entries")
+cat_json = json.dumps(extra, ensure_ascii=False, indent=1)
+open("../dashboard/dist/catalog.json", "w", encoding="utf-8").write(cat_json)
+print("dist/catalog.json", len(cat_json), "chars,", len(extra), "catalog entries")

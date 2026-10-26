@@ -1875,10 +1875,10 @@
     window.__HERMES_ZH_EXTRA_LOADED__ = true;
     var me = document.currentScript && document.currentScript.src;
     var base = me ? me.replace(/[^/]+$/, "") : "/dashboard-plugins/hermes-zh/dist/";
-    var s = document.createElement("script");
-    s.src = base + "catalog.js";
-    s.async = true;
-    document.head.appendChild(s);
+    fetch(base + "catalog.json")
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (obj) { if (obj) window.__HERMES_ZH_MERGE__(obj); })
+      .catch(function () {});
   }
 
   if (document.readyState === "complete") {
@@ -1927,7 +1927,7 @@
     return h("div", { style: { padding: "20px 16px", maxWidth: 720, lineHeight: 1.8, fontSize: 14 } },
       h("h2", { style: { margin: "0 0 10px", fontSize: 18 } }, "中文增强"),
       h("p", { style: { margin: "0 0 6px" } },
-        "运行时词典已加载 " + 2584 + " 条，把控制台里写死的英文界面文案替换成中文。"),
+        "运行时词典已加载 " + 2579 + " 条，把控制台里写死的英文界面文案替换成中文。"),
       h("p", { style: { margin: "0 0 6px" } }, "状态：已启用"),
       h("button", {
         onClick: off,
