@@ -1,8 +1,8 @@
-# hermes-zh · Hermes 控制台中文增强插件
+# hermes-zh-web · Hermes 网页控制台中文增强插件
 
 给 [Hermes Agent](https://github.com/NousResearch/hermes-agent) 的网页控制台补中文——**作为插件运行，不改源码、不需要重新构建前端、升级 Hermes 也不会被冲掉**。
 
-覆盖 2600+ 条界面文案：侧边栏、对话、会话、文件、模型、配置（含 908 条字段说明）、渠道、密钥、系统、成就，以及**插件市场 860+ 个插件的简介**。
+覆盖 2900+ 条界面文案：侧边栏、对话、会话、文件、模型、配置（含 908 条字段说明）、渠道、密钥、系统、成就，以及**插件市场 860+ 个插件的简介**。
 
 ## 安装
 
@@ -11,7 +11,7 @@
 控制台 → 插件 → 「从 GitHub / Git 地址安装」→ 填：
 
 ```
-wond03/hermes-zh-plugin
+wond03/hermes-zh-web
 ```
 
 勾上「安装后启用」→ 安装 → 刷新页面。
@@ -21,21 +21,21 @@ wond03/hermes-zh-plugin
 **方式二：手动放目录**
 
 ```bash
-git clone https://github.com/wond03/hermes-zh-plugin ~/.hermes/plugins/hermes-zh
-hermes config set plugins.enabled '["hermes-zh"]'
+git clone https://github.com/wond03/hermes-zh-web ~/.hermes/plugins/hermes-zh-web
+hermes config set plugins.enabled '["hermes-zh-web"]'
 systemctl restart hermes-dashboard
 ```
 
-装好后刷新浏览器：侧边栏多出一个「中文增强」页（`/hermes-zh`，说明 + 停用按钮），其余界面文案变中文。
+装好后刷新浏览器：侧边栏多出一个「中文增强」页（`/hermes-zh-web`，说明 + 停用按钮），其余界面文案变中文。
 
-> 插件市场里已经有一个同名的 `hermes-zh`（别人的简体中文语言包，只覆盖 `approval.*` / `gateway.*` 一小块）。从 GitHub 安装到同名目录会覆盖，装之前先确认 `~/.hermes/plugins/hermes-zh` 是空的。
-
+> 插件市场里另有一个 `hermes-zh`（Cody292 做的 CLI/TUI 语言包，只覆盖 `approval.*` / `gateway.*` 共 261 键）。
+> 本插件叫 `hermes-zh-web`，管网页控制台，**两者可以同时装、互不覆盖**：一个管终端，一个管浏览器。
 ## 关闭 / 恢复 / 卸载
 
 **临时关掉（保留插件，随时开回来）**
 
 1. 侧边栏「中文增强」→ 点「停用中文（界面回到英文）」→ 页面自动刷新，立刻是英文
-2. 「插件」页 → 已安装插件 → `hermes-zh` → 「停用」
+2. 「插件」页 → 已安装插件 → `hermes-zh-web` → 「停用」
 3. 命令行：
 
 ```bash
@@ -43,12 +43,12 @@ hermes config set plugins.enabled '[]'
 systemctl restart hermes-dashboard
 ```
 
-停用后刷新浏览器即生效，不用重启服务。恢复：「插件」页 → `hermes-zh` → 「启用」→ 刷新。
+停用后刷新浏览器即生效，不用重启服务。恢复：「插件」页 → `hermes-zh-web` → 「启用」→ 刷新。
 
 **彻底卸载**
 
 ```bash
-rm -rf ~/.hermes/plugins/hermes-zh
+rm -rf ~/.hermes/plugins/hermes-zh-web
 hermes config set plugins.enabled '[]'
 systemctl restart hermes-dashboard
 ```

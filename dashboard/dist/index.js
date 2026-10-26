@@ -2099,7 +2099,8 @@
   var AUTO_BLACK = /^(Anthropic|DeepSeek|OpenAI|Nous|Nous Portal|Hermes|MCP|API|CLI|JSON|SQLite|GitHub|Docker|Python|Node|Kanban|Discord|Slack|Telegram|Matrix|Mattermost|OAuth|Webhook|Linux|macOS|Windows|Gemini|Kimi|Moonshot|MiniMax|Hugging Face|GLM|Bedrock|Vertex|Supabase|Airtable|OpenRouter|DashScope|Qwen|Grok)$/i;
 
   function autoOn() {
-    try { return localStorage.getItem(AUTO_KEY) === "1"; } catch (e) { return false; }
+    // 默认开启：词库优先，没收录的再走机器翻译；想关就设 hermes:zh-auto=0
+    try { return localStorage.getItem(AUTO_KEY) !== "0"; } catch (e) { return true; }
   }
 
   // 这些区域不翻译：终端、代码、输入框、编辑器
@@ -2314,7 +2315,7 @@
     if (window.__HERMES_ZH_EXTRA_LOADED__) return;
     window.__HERMES_ZH_EXTRA_LOADED__ = true;
     var me = document.currentScript && document.currentScript.src;
-    var base = me ? me.replace(/[^/]+$/, "") : "/dashboard-plugins/hermes-zh/dist/";
+    var base = me ? me.replace(/[^/]+$/, "") : "/dashboard-plugins/hermes-zh-web/dist/";
     fetch(base + "catalog.json")
       .then(function (r) { return r.ok ? r.json() : null; })
       .then(function (obj) { if (obj) window.__HERMES_ZH_MERGE__(obj); })
@@ -2360,7 +2361,7 @@
     var muted = { color: "var(--text-tertiary, #888)", fontSize: 12, margin: "4px 0" };
     function off() {
       setSt("正在停用…");
-      fetch("/api/dashboard/agent-plugins/hermes-zh/disable", {
+      fetch("/api/dashboard/agent-plugins/hermes-zh-web/disable", {
         method: "POST", headers: { "Content-Type": "application/json" }, body: "{}",
       }).then(function (r) { return r.json(); }).then(function (d) {
         if (d && d.ok) { location.reload(); }
@@ -2395,11 +2396,11 @@
           border: "1px solid var(--border, #444)", background: "transparent",
           color: "inherit", cursor: "pointer",
         },
-      }, autoOn ? "已开启 · 点此关闭" : "开启自动翻译"),
+      }, autoOn ? "自动翻译：开 · 点此关闭" : "自动翻译：关 · 点此开启"),
       h("p", { style: muted },
         autoOn
-          ? "已开启。品牌名（Anthropic、DeepSeek 等）不会翻；聊天内容、日志、文件名、输入框不会碰。翻译结果缓存在本机 localStorage。"
-          : "开启后会把界面上没收录的英文短句发给 bilibili Index-Translate（公开免费接口，35B 翻译模型），一次 12 条批量翻。介意隐私或离线环境就别开。"),
+          ? "已开启：词库没收录的英文短句会发给 bilibili Index-Translate（免费公开接口）翻译。品牌名、聊天内容、日志、文件名、输入框都不会碰，结果缓存在本机。"
+          : "已关闭：只用本地词库，界面可能有少量英文残留，但不联网。"),
       h("p", { style: muted },
         "只覆盖组件里写死的英文；词条文件、配置页字段说明、登录页、手机端输入栏由配套补丁负责。"),
       h("p", { style: muted }, "改词条：更新插件即可，不需要重新构建前端。")
@@ -2408,6 +2409,6 @@
 
   var PLUGINS = window.__HERMES_PLUGINS__;
   if (PLUGINS && PLUGINS.register) {
-    PLUGINS.register("hermes-zh", ZhPanel);
+    PLUGINS.register("hermes-zh-web", ZhPanel);
   }
 })();

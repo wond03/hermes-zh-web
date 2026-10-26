@@ -1,4 +1,4 @@
-name: hermes-zh
+name: hermes-zh-web
 version: 1.0.0
 description: "控制台中文增强：运行时词典把界面里写死的英文文案替换成中文，不改源码、不需要重新构建。"
 author: hermes-zh
