@@ -4,5 +4,9 @@
   "description": "运行时中文词典：把控制台里写死的英文界面文案替换成中文，不改源码、不需要重新构建。",
   "icon": "Languages",
   "version": "1.0.0",
-  "entry": "dist/index.js"
+  "entry": "dist/index.js",
+  "tab": {
+    "path": "/hermes-zh",
+    "hidden": true
+  }
 }
