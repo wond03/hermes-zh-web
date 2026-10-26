@@ -290,9 +290,7 @@
     "Bot Mode → Envelope Ttl Seconds": "机器人模式 → 信封 TTL 秒数",
     "Bot Mode → Turn Wait Seconds": "机器人模式 → 轮次等待秒数",
     "Both options connect a bot you control and save its credentials only to this Hermes installation.": "两个选项都会连接你控制的机器人，并仅将其凭据保存到此 Hermes 安装。",
-    "Bounded Markdown metadata+graph prefilter for configured local roots": "为配置的本地根目录提供有界 Markdown 元数据+图预过滤",
     "Box manages cloud files, sharing, search, and metadata.": "Box 管理云文件、共享、搜索和元数据",
-    "Brave Search API tools for live web search inside Hermes": "Brave Search API 工具，用于 Hermes 内实时网络搜索",
     "Bring Claude-flavored reasoning into the workflow repeatedly.": "反复将 Claude 风格推理带入工作流。",
     "Broken link": "失效链接",
     "Browse Nous-approved MCP servers and install them with one click.": "浏览 Nous 认证的 MCP 服务器并一键安装",
@@ -531,7 +529,6 @@
     "Delegate coding to Claude Code CLI (features, PRs).": "将编码委派给 Claude Code CLI（功能、PR）",
     "Delegate coding to OpenAI Codex CLI (features, PRs).": "将编码委派给 OpenAI Codex CLI（功能、PR）",
     "Delegate coding to OpenCode CLI (features, PR review).": "将编码委派给 OpenCode CLI（功能、PR 审查）",
-    "Delegate-only, fail-closed Kimi Code ACP integration for Hermes Agent": "仅委派、失败关闭的 Kimi Code ACP 集成，用于 Hermes Agent",
     "Delegation → Api Key": "委派 → API 密钥",
     "Delegation → Api Mode": "委派 → API 模式",
     "Delegation → Backend": "委派 → 后端",
@@ -798,7 +795,6 @@
     "Gemini Cartographer": "Gemini制图师",
     "Generate images, video, audio, and 3D on Comfy Cloud.": "在 Comfy Cloud 上生成图像、视频、音频和 3D",
     "Generate share link": "生成分享链接",
-    "Generic S3-compatible backup and restore operations for Hermes": "Hermes 的通用 S3 兼容备份与恢复操作",
     "Generic relay adapter fronted by the Hermes Relay connector.": "由Hermes Relay连接器前端的通用中继适配器",
     "Get a key": "获取密钥",
     "Git activity after a serious tool chain.": "严肃工具链后的 Git 活动",
@@ -808,7 +804,6 @@
     "GitHub via gh CLI: PRs, issues, reviews, repos, auth.": "通过 gh CLI 使用 GitHub：PR、议题、评审、仓库、认证",
     "Goals → Max Turns": "目标 → 最大轮次",
     "Gold": "黄金",
-    "Gondola, a USDC-settled marketplace API for Venice AI inference": "Gondola，面向 Venice AI 推理的 USDC 结算市场 API",
     "Groq Whisper model": "Groq Whisper 模型",
     "HTTP authentication": "HTTP 认证",
     "Handle real git history surgery: rebase, conflict, merge, fetch, push.": "处理真实git历史手术：变基、冲突、合并、拉取、推送",
@@ -839,10 +834,8 @@
     "Import exported session JSON or JSONL": "导入导出的会话 JSON 或 JSONL",
     "Import exported sessions": "导入导出的会话",
     "Import sessions": "导入会话",
-    "In-window sticky notes for Hermes Desktop.": "Hermes Desktop 的窗口内便签",
     "Input behavior while agent is running": "代理运行时的输入行为",
     "Inspect logs repeatedly instead of guessing.": "反复检查日志，而非猜测",
-    "Inspect session costs and usage in Hermes Desktop.": "在 Hermes Desktop 中检查会话成本与用量",
     "Install": "安装",
     "Install the": "安装",
     "Installed": "已安装",
@@ -882,7 +875,6 @@
     "Linked": "已关联",
     "Live Probe Timeout": "实时探测超时",
     "Live through gateway-connected Hermes workflows.": "通过网关连接的 Hermes 工作流实时运行",
-    "Live web search, news, Ask, page crawl, sitemap, and trending via Search1API": "通过 Search1API 进行实时网页搜索、新闻、Ask、页面抓取、站点地图和趋势",
     "Load avg": "负载均值",
     "Loading": "加载中",
     "Loading blueprints…": "正在加载蓝图…",
@@ -899,8 +891,6 @@
     "Local browser": "本地浏览器",
     "Local faster-whisper model size": "本地 faster-whisper 模型大小",
     "Local file or directory": "本地文件或目录",
-    "Local health and daily-context data store for Hermes.": "Hermes 的本地健康与每日上下文数据存储",
-    "Local-only YantrikDB dashboard for Hermes Agent memory operations": "仅本地运行的 YantrikDB 仪表板，用于 Hermes Agent 记忆操作",
     "Local_runtime": "本地运行时",
     "Log in with": "登录方式",
     "Log level for agent.log": "agent.log 的日志级别",
@@ -967,7 +957,6 @@
     "Migrate to a single multiplexed gateway": "迁移至单一多路复用网关",
     "MiniMax (China)": "MiniMax（中国）",
     "MiniMax (OAuth)": "MiniMax（OAuth）",
-    "MiniMax web search via the Token Plan API — keyed, no CAPTCHA": "通过 Token Plan API 进行 MiniMax 网页搜索——需密钥，无验证码",
     "Mistral API key for Voxtral TTS and transcription (STT)": "用于 Voxtral TTS 和转录（STT）的 Mistral API 密钥",
     "Mistral Voxtral transcription model": "Mistral Voxtral 转写模型",
     "Mixture of Agents": "多代理混合",
@@ -1046,7 +1035,6 @@
     "Offline": "离线",
     "Older than (days)": "早于（天）",
     "Olympian": "奥林匹斯",
-    "OmniVoice TTS provider for Hermes Agent": "Hermes Agent 的 OmniVoice TTS 提供方",
     "Onboarding → Profile Build": "引导 → 配置档构建",
     "Onboarding → Run": "引导 → 运行",
     "One Character Fix": "一字修复",
@@ -1064,7 +1052,6 @@
     "OpenAI live transcription model (stt.streaming)": "OpenAI 实时转写模型（stt.streaming）",
     "OpenAI transcription model": "OpenAI 转写模型",
     "OpenRouter Enjoyer": "OpenRouter 爱好者",
-    "OpenSpec CLI tools for spec-driven development workflows": "用于规范驱动开发工作流的 OpenSpec CLI 工具",
     "OpenViking API key (leave blank for local dev mode)": "OpenViking API 密钥（留空以使用本地开发模式）",
     "Openrouter": "OpenRouter",
     "Openrouter → Min Coding Score": "Openrouter → 最低编码评分",
@@ -1341,7 +1328,6 @@
     "Share debug report": "分享调试报告",
     "Shell hooks": "Shell 钩子",
     "Ship First, Ask Later": "先发布，后询问",
-    "Shodan tools with complete capability declarations.": "Shodan 工具，具备完整能力声明。",
     "Show chat side panel": "显示聊天侧栏",
     "Show side panel (model + sessions)": "显示侧栏（模型+会话）",
     "Sign in to a provider": "登录提供方",
@@ -1692,11 +1678,16 @@
     "YouTube transcripts to summaries, threads, blogs.": "YouTube 转录到摘要、推文串、博客。",
     "Your MCP servers (": "您的 MCP 服务器（",
     "applies to new sessions": "对新会话生效",
+    "automation": "自动化",
     "built-in only": "仅内置",
     "channels configured. Credentials are written to": "渠道已配置。凭据写入",
+    "communication": "通讯",
     "configure in Plugins": "在插件中配置",
     "copy last response": "复制上一条回复",
+    "data": "数据",
+    "desktop": "桌面",
     "every 168h": "每168小时",
+    "general": "通用",
     "gh auth token": "gh 认证令牌",
     "hermes portal": "Hermes 门户",
     "iMessage via Photon": "通过 Photon 使用 iMessage",
@@ -1708,11 +1699,17 @@
     "macos, linux": "macos、linux",
     "macos, linux, windows": "macos、linux、windows",
     "macos, windows": "macos、windows",
+    "media": "媒体",
+    "memory": "记忆",
+    "models": "模型",
     "not configured": "未配置",
     "not logged in": "未登录",
     "p5.js sketches: gen art, shaders, interactive, 3D.": "p5.js 草图：生成艺术、着色器、交互、3D",
+    "platform": "平台",
+    "productivity": "效率",
     "recommended": "推荐",
     "roli-lpci (Hermes Labs; independent of Nous Research)": "roli-lpci（Hermes Labs；独立于 Nous Research）",
+    "security": "安全",
     "session(s) ·": "会话 ·",
     "session.terminal_continue": "会话.终端继续",
     "source ↗": "来源 ↗",
@@ -1724,6 +1721,8 @@
     "updates.parked_branch_strategy": "更新.暂存分支策略",
     "updates.pre_update_backup": "更新.更新前备份",
     "updates.refresh_cua_driver": "更新.刷新CUA驱动",
+    "voice": "语音",
+    "web": "网页",
     "windows, linux": "windows、linux",
     "windows, linux, macos": "windows、linux、macos",
     "windows, macos": "windows、macos",
@@ -1787,7 +1786,7 @@
     var raw = node.nodeValue;
     if (!raw) return;
     var t = raw.trim();
-    if (!t || t.length > 320) return;
+    if (!t || t.length > 2000) return;
     var hit = lookup(t);
     if (!hit) return;
     if (skipped(node)) return;
@@ -1860,6 +1859,36 @@
     }).observe(document.documentElement, { attributes: true, attributeFilter: ["lang"] });
   }
 
+  // ---- 插件市场词典按需加载（体积大，空闲时再拉，不阻塞首屏）----
+  window.__HERMES_ZH_MERGE__ = function (obj) {
+    var n = 0;
+    for (var k in obj) {
+      if (!Object.prototype.hasOwnProperty.call(obj, k)) continue;
+      if (!DICT[k]) { DICT[k] = obj[k]; n++; }
+      LOWER[k.toLowerCase()] = obj[k];
+    }
+    if (n && isZh()) walk(document.body);
+  };
+
+  function loadExtra() {
+    if (window.__HERMES_ZH_EXTRA_LOADED__) return;
+    window.__HERMES_ZH_EXTRA_LOADED__ = true;
+    var me = document.currentScript && document.currentScript.src;
+    var base = me ? me.replace(/[^/]+$/, "") : "/dashboard-plugins/hermes-zh/dist/";
+    var s = document.createElement("script");
+    s.src = base + "catalog.js";
+    s.async = true;
+    document.head.appendChild(s);
+  }
+
+  if (document.readyState === "complete") {
+    (window.requestIdleCallback || function (f) { setTimeout(f, 1200); })(loadExtra, { timeout: 2500 });
+  } else {
+    window.addEventListener("load", function () {
+      (window.requestIdleCallback || function (f) { setTimeout(f, 1200); })(loadExtra, { timeout: 2500 });
+    });
+  }
+
   // 停用开关（插件页里可切换），存在 localStorage，刷新后生效
   var DISABLE_KEY = "hermes:zh-disabled";
   function enabled() {
@@ -1898,7 +1927,7 @@
     return h("div", { style: { padding: "20px 16px", maxWidth: 720, lineHeight: 1.8, fontSize: 14 } },
       h("h2", { style: { margin: "0 0 10px", fontSize: 18 } }, "中文增强"),
       h("p", { style: { margin: "0 0 6px" } },
-        "运行时词典已加载 " + 1723 + " 条，把控制台里写死的英文界面文案替换成中文。"),
+        "运行时词典已加载 " + 2584 + " 条，把控制台里写死的英文界面文案替换成中文。"),
       h("p", { style: { margin: "0 0 6px" } }, "状态：已启用"),
       h("button", {
         onClick: off,

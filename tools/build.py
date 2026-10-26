@@ -1,12 +1,22 @@
 import json
 
-zh = json.load(open("dict/ui_zh.json", encoding="utf-8"))
+zh = json.load(open("../dict/ui_zh.json", encoding="utf-8"))
 # 去掉会误伤的字串（太短或纯符号）
 zh = {k: v for k, v in zh.items() if len(k) >= 3 and k.strip() == k and k != v}
-pairs = ",\n".join(
-    '    %s: %s' % (json.dumps(k, ensure_ascii=False), json.dumps(v, ensure_ascii=False))
-    for k, v in sorted(zh.items())
-)
+
+# 插件市场的长简介体积大（约占词典 2/3），拆成按需加载的 catalog.js，避免拖慢首屏
+import os
+_cat = set(json.load(open("catalog_keys.json", encoding="utf-8"))) if os.path.exists("catalog_keys.json") else set()
+core = {k: v for k, v in zh.items() if k not in _cat}
+extra = {k: v for k, v in zh.items() if k in _cat}
+
+def _pairs(d):
+    return ",\n".join(
+        '    %s: %s' % (json.dumps(k, ensure_ascii=False), json.dumps(v, ensure_ascii=False))
+        for k, v in sorted(d.items())
+    )
+
+pairs = _pairs(core)
 
 js = r"""/* Hermes 控制台中文覆盖层（zh overlay）
  * 作用：在中文界面下，把渲染出来的英文界面文案替换成中文。
@@ -75,7 +85,7 @@ __PAIRS__
     var raw = node.nodeValue;
     if (!raw) return;
     var t = raw.trim();
-    if (!t || t.length > 320) return;
+    if (!t || t.length > 2000) return;
     var hit = lookup(t);
     if (!hit) return;
     if (skipped(node)) return;
@@ -148,6 +158,36 @@ __PAIRS__
     }).observe(document.documentElement, { attributes: true, attributeFilter: ["lang"] });
   }
 
+  // ---- 插件市场词典按需加载（体积大，空闲时再拉，不阻塞首屏）----
+  window.__HERMES_ZH_MERGE__ = function (obj) {
+    var n = 0;
+    for (var k in obj) {
+      if (!Object.prototype.hasOwnProperty.call(obj, k)) continue;
+      if (!DICT[k]) { DICT[k] = obj[k]; n++; }
+      LOWER[k.toLowerCase()] = obj[k];
+    }
+    if (n && isZh()) walk(document.body);
+  };
+
+  function loadExtra() {
+    if (window.__HERMES_ZH_EXTRA_LOADED__) return;
+    window.__HERMES_ZH_EXTRA_LOADED__ = true;
+    var me = document.currentScript && document.currentScript.src;
+    var base = me ? me.replace(/[^/]+$/, "") : "/dashboard-plugins/hermes-zh/dist/";
+    var s = document.createElement("script");
+    s.src = base + "catalog.js";
+    s.async = true;
+    document.head.appendChild(s);
+  }
+
+  if (document.readyState === "complete") {
+    (window.requestIdleCallback || function (f) { setTimeout(f, 1200); })(loadExtra, { timeout: 2500 });
+  } else {
+    window.addEventListener("load", function () {
+      (window.requestIdleCallback || function (f) { setTimeout(f, 1200); })(loadExtra, { timeout: 2500 });
+    });
+  }
+
   // 停用开关（插件页里可切换），存在 localStorage，刷新后生效
   var DISABLE_KEY = "hermes:zh-disabled";
   function enabled() {
@@ -212,5 +252,9 @@ __PAIRS__
 
 js = js.replace("__PAIRS__", pairs)
 js = js.replace("__COUNT__", str(len(zh)))
-open("dashboard/dist/index.js", "w", encoding="utf-8").write(js)
-print("dashboard/dist/index.js", len(js), "bytes,", len(zh), "entries")
+open("../dashboard/dist/index.js", "w", encoding="utf-8").write(js)
+print("dist/index.js", len(js), "chars,", len(core), "core entries")
+
+cat_js = "/* 插件市场简介词典（按需加载，由 index.js 空闲时注入） */\nwindow.__HERMES_ZH_MERGE__ && window.__HERMES_ZH_MERGE__({\n" + _pairs(extra) + "\n});\n"
+open("../dashboard/dist/catalog.js", "w", encoding="utf-8").write(cat_js)
+print("dist/catalog.js", len(cat_js), "chars,", len(extra), "catalog entries")
