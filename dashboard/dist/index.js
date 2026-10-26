@@ -2424,6 +2424,18 @@
     var boxRef = R.useRef(null);
     var taRef = R.useRef(null);
 
+    // 插槽在 SPA 里跨路由常驻，必须自己判断只在 /chat 显示，否则别的页面底部也挂着输入条
+    var ps = R.useState(window.location.pathname), path = ps[0], setPath = ps[1];
+    R.useEffect(function () {
+      function onNav() { setPath(window.location.pathname); }
+      window.addEventListener("popstate", onNav);
+      var t = setInterval(onNav, 400);
+      return function () {
+        window.removeEventListener("popstate", onNav);
+        clearInterval(t);
+      };
+    }, []);
+
     // 键盘弹出/收起时，把输入条贴在可视区域底部，避免整页跳动
     R.useEffect(function () {
       var vv = window.visualViewport;
@@ -2540,6 +2552,9 @@
       padding: "9px 11px", borderRadius: 8, border: "1px solid var(--border, #3a3a3a)",
       background: "transparent", color: "inherit", fontSize: 13, cursor: "pointer", whiteSpace: "nowrap", lineHeight: 1
     };
+
+    var onChat = /^\/chat(\/|$)/.test(path) || path === "/";
+    if (!onChat) return null;
 
     return h("div", {
       ref: boxRef,
