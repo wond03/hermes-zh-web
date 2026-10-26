@@ -2418,6 +2418,34 @@
     var st = R.useState(""), val = st[0], setVal = st[1];
     var cst = R.useState(false), showCmds = cst[0], setShowCmds = cst[1];
     var busy = R.useState(false), sending = busy[0], setSending = busy[1];
+    var fileRef = R.useRef(null);
+    var up = R.useState(""), upMsg = up[0], setUpMsg = up[1];
+
+    function uploadImage(file) {
+      if (!file) return;
+      setUpMsg("上传中…");
+      var reader = new FileReader();
+      reader.onload = function () {
+        var dataUrl = String(reader.result || "");
+        fetch("/api/chat/image-upload", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-Hermes-Session-Token": window.__HERMES_SESSION_TOKEN__ || ""
+          },
+          credentials: "include",
+          body: JSON.stringify({ data_url: dataUrl, filename: file.name || "image.png" })
+        })
+          .then(function (r) { return r.ok ? r.json() : r.json().then(function (e) { throw new Error(e.detail || "上传失败"); }); })
+          .then(function (d) {
+            if (!d || !d.path) throw new Error("没拿到路径");
+            setVal("/image " + d.path + " ");
+            setUpMsg("");
+          })
+          .catch(function (e) { setUpMsg(String(e.message || e).slice(0, 40)); });
+      };
+      reader.readAsDataURL(file);
+    }
 
     function ta() { return document.querySelector(".xterm-helper-textarea"); }
 
@@ -2473,11 +2501,24 @@
           }, c.trim());
         })
       ),
+      upMsg && h("p", { style: { margin: "0 2px", fontSize: 12, color: "var(--text-tertiary, #888)" } }, upMsg),
       h("div", { style: { display: "flex", gap: 8, alignItems: "flex-end" } },
         h("button", {
           style: btn, title: "常用命令",
           onClick: function () { setShowCmds(!showCmds); }
         }, "⌘"),
+        h("button", {
+          style: Object.assign({}, btn, { padding: "8px 10px" }), title: "发送图片",
+          onClick: function () { if (fileRef.current) fileRef.current.click(); }
+        }, "图"),
+        h("input", {
+          ref: fileRef, type: "file", accept: "image/*", style: { display: "none" },
+          onChange: function (e) {
+            var f = e.target.files && e.target.files[0];
+            uploadImage(f);
+            e.target.value = "";
+          }
+        }),
         h("textarea", {
           value: val,
           rows: 1,

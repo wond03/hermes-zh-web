@@ -83,6 +83,22 @@ python3 tools/translate_catalog.py   # 需要 DEEPSEEK_API_KEY，断点续跑
 4. 跳过 `pre/code/input/textarea/终端/可编辑区`，文件名、日志、代码、输入内容不会被误翻
 5. 空闲时（`requestIdleCallback`）再 fetch `dashboard/dist/catalog.json`（857 条插件简介），**不拖慢首屏**
 
+## 手机端输入条
+
+`/chat` 页底部会多一条输入栏（官方移动端没有可见输入框）：
+
+```
+⌘   图   [ 输入消息，回车发送 ]   发送
+```
+
+- **⌘** 常用命令面板：`/help` `/new` `/model` `/resume` `/compact` `/status` `/clear` `/image`
+- **图** 选图/拍照 → 上传到 `HERMES_HOME/cache/images/` → 自动填入 `/image <路径>`
+- **发送** 把文字送进终端并回车
+
+实现方式：往官方 `chat:bottom` 插槽渲染输入条，发送时用 `paste` 事件把文本注入终端的隐藏输入框（xterm 的 `.xterm-helper-textarea`），再补一个回车。**不依赖官方的发送 API**（SDK 没有暴露）。
+
+> 已知：官方若改掉 xterm 的隐藏输入框结构，这条输入栏会失效（只影响输入栏，不动其他功能）。
+
 ## 未收录文案自动翻译（可选，默认关）
 
 词库覆盖不到的地方（第三方插件的按钮、上游新加的文案），可以在「中文增强」页打开**自动翻译**：
