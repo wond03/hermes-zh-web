@@ -2950,5 +2950,15 @@
  "comma-separated values": "逗号分隔的值",
  "e.g. MY_SERVICE_API_KEY": "例如 MY_SERVICE_API_KEY",
  "in a terminal.": "在终端中。",
- "owner/repo, owner/repo/subdir, or https://...": "owner/repo、owner/repo/subdir 或 https://..."
+ "owner/repo, owner/repo/subdir, or https://...": "owner/repo、owner/repo/subdir 或 https://...",
+ "Custom Keys": "自定义密钥",
+ "Hide Advanced": "收起高级选项",
+ "Show Advanced": "展开高级选项",
+ "Git pull": "从 Git 更新",
+ "In Progress": "进行中",
+ "Triage": "待分诊",
+ "Settings": "设置",
+ "New board": "新建看板",
+ "Anthropic Account": "Anthropic 账户",
+ "Board settings": "看板设置"
 }
