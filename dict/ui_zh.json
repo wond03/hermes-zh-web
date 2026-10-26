@@ -2965,5 +2965,10 @@
  "Boards": "看板",
  "board": "看板",
  "Target Copper": "目标铜牌",
- "Add task": "添加任务"
+ "Add task": "添加任务",
+ "+ New board": "+ 新建看板",
+ "TENANT": "租户",
+ "tenant": "租户",
+ "ASSIGNEE": "负责人",
+ "assignee": "负责人"
 }

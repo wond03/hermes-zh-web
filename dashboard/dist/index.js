@@ -10,6 +10,7 @@
 
   var DICT = {
     "(built-in / default)": "（内置 / 默认）",
+    "+ New board": "+ 新建看板",
     "0 of 8 OAuth providers connected. Use Login for dashboard-supported flows; CLI commands remain available for external or fallback setup.": "已连接 0/8 个 OAuth 提供商。使用 Login 进行仪表板支持的流程；CLI 命令仍可用于外部或备用设置。",
     "0 tasks in this column": "此列中有 0 个任务",
     "1 key": "1 个密钥",
@@ -32,6 +33,7 @@
     "API key": "API 密钥",
     "API server": "API 服务器",
     "ASCII video: convert video/audio to colored ASCII MP4/GIF.": "ASCII 视频：将视频/音频转换为彩色 ASCII MP4/GIF。",
+    "ASSIGNEE": "负责人",
     "Accumulate a lifetime avalanche of Hermes tool calls across sessions.": "跨会话累计 Hermes 工具调用的终身雪崩。",
     "Accumulate a serious number of Hermes sessions.": "积累大量 Hermes 会话",
     "Achievements": "成就",
@@ -1713,6 +1715,7 @@
     "System": "系统",
     "System prompt": "系统提示词",
     "TDD: enforce RED-GREEN-REFACTOR, tests before code.": "TDD：强制红-绿-重构，测试先于代码。",
+    "TENANT": "租户",
     "Talk to Hermes over SimpleX Chat via a local simplex-chat daemon.": "通过本地 simplex-chat 守护进程在 SimpleX Chat 上与 Hermes 对话",
     "Talk to Hermes through an IMAP/SMTP mailbox.": "通过 IMAP/SMTP 邮箱与 Hermes 对话",
     "Target Copper": "目标铜牌",
@@ -2004,6 +2007,7 @@
     "YouTube transcripts to summaries, threads, blogs.": "YouTube 转录到摘要、推文串、博客。",
     "Your MCP servers (": "您的 MCP 服务器（",
     "applies to new sessions": "对新会话生效",
+    "assignee": "负责人",
     "automation": "自动化",
     "board": "看板",
     "browser-use:": "browser-use：",
@@ -2053,6 +2057,7 @@
     "session(s) ·": "会话 ·",
     "session.terminal_continue": "会话.终端继续",
     "source ↗": "来源 ↗",
+    "tenant": "租户",
     "to show the local debug estimate anyway.": "仍显示本地调试估算",
     "tool_describe,": "tool_describe，",
     "trivago hotel search: compare prices by city and dates.": "trivago 酒店搜索：按城市和日期比较价格",
@@ -2337,7 +2342,7 @@
     return h("div", { style: { padding: "20px 16px", maxWidth: 720, lineHeight: 1.8, fontSize: 14 } },
       h("h2", { style: { margin: "0 0 10px", fontSize: 18 } }, "中文增强"),
       h("p", { style: { margin: "0 0 6px" } },
-        "运行时词典已加载 " + 2920 + " 条，把控制台里写死的英文界面文案替换成中文。"),
+        "运行时词典已加载 " + 2925 + " 条，把控制台里写死的英文界面文案替换成中文。"),
       h("p", { style: { margin: "0 0 6px" } }, "状态：已启用"),
       h("button", {
         onClick: off,
@@ -2351,7 +2356,7 @@
       h("hr", { style: { border: 0, borderTop: "1px solid var(--border, #333)", margin: "14px 0" } }),
       h("p", { style: { margin: "0 0 6px", fontWeight: 600 } }, "未收录文案自动翻译"),
       h("p", { style: muted },
-        "词库只有 " + 2920 + " 条，剩下的（第三方插件的按钮、新版本加的文案）可以用免费翻译接口临时补上。结果存在本机，翻一次就不再请求。"),
+        "词库只有 " + 2925 + " 条，剩下的（第三方插件的按钮、新版本加的文案）可以用免费翻译接口临时补上。结果存在本机，翻一次就不再请求。"),
       h("button", {
         onClick: function () {
           var next = !autoOn;
