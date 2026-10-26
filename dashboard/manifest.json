@@ -8,5 +8,8 @@
   "tab": {
     "path": "/hermes-zh-web",
     "position": "end"
-  }
+  },
+  "slots": [
+    "chat:bottom"
+  ]
 }

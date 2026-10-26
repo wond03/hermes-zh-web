@@ -2409,8 +2409,102 @@
     );
   }
 
+  // ---- 移动端输入条：手机上没有可见输入框，这里补一个 ----
+  function ChatDock() {
+    var SDK = window.__HERMES_PLUGIN_SDK__ || {};
+    var R = SDK.React;
+    if (!R) return null;
+    var h = R.createElement;
+    var st = R.useState(""), val = st[0], setVal = st[1];
+    var cst = R.useState(false), showCmds = cst[0], setShowCmds = cst[1];
+    var busy = R.useState(false), sending = busy[0], setSending = busy[1];
+
+    function ta() { return document.querySelector(".xterm-helper-textarea"); }
+
+    function pasteText(text) {
+      var t = ta();
+      if (!t) return false;
+      t.focus();
+      var dt = new DataTransfer();
+      dt.setData("text/plain", text);
+      t.dispatchEvent(new ClipboardEvent("paste", { clipboardData: dt, bubbles: true, cancelable: true }));
+      return true;
+    }
+
+    function pressEnter() {
+      var t = ta();
+      if (!t) return;
+      ["keydown", "keyup"].forEach(function (kind) {
+        t.dispatchEvent(new KeyboardEvent(kind, { key: "Enter", code: "Enter", keyCode: 13, which: 13, bubbles: true }));
+      });
+    }
+
+    function send() {
+      var text = String(val || "").trim();
+      if (!text || sending) return;
+      setSending(true);
+      if (!pasteText(text)) { setSending(false); return; }
+      setTimeout(function () {
+        pressEnter();
+        setVal("");
+        setSending(false);
+      }, 80);
+    }
+
+    var CMDS = ["/help", "/new", "/model", "/resume", "/compact", "/status", "/clear", "/image "];
+
+    var btn = {
+      padding: "8px 12px", borderRadius: 8, border: "1px solid var(--border, #3a3a3a)",
+      background: "transparent", color: "inherit", fontSize: 13, cursor: "pointer", whiteSpace: "nowrap"
+    };
+
+    return h("div", {
+      style: {
+        position: "sticky", bottom: 0, left: 0, right: 0, zIndex: 40,
+        background: "var(--bg, #111)", borderTop: "1px solid var(--border, #333)",
+        padding: "8px 10px calc(8px + env(safe-area-inset-bottom))", display: "flex", flexDirection: "column", gap: 8
+      }
+    },
+      showCmds && h("div", { style: { display: "flex", flexWrap: "wrap", gap: 6 } },
+        CMDS.map(function (c) {
+          return h("button", {
+            key: c, style: btn,
+            onClick: function () { setVal(c); setShowCmds(false); }
+          }, c.trim());
+        })
+      ),
+      h("div", { style: { display: "flex", gap: 8, alignItems: "flex-end" } },
+        h("button", {
+          style: btn, title: "常用命令",
+          onClick: function () { setShowCmds(!showCmds); }
+        }, "⌘"),
+        h("textarea", {
+          value: val,
+          rows: 1,
+          placeholder: "输入消息，回车发送",
+          onChange: function (e) { setVal(e.target.value); },
+          onKeyDown: function (e) {
+            if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); }
+          },
+          style: {
+            flex: 1, resize: "none", maxHeight: 96, minHeight: 38, padding: "9px 10px",
+            borderRadius: 8, border: "1px solid var(--border, #3a3a3a)",
+            background: "var(--bg-elevated, #1a1a1a)", color: "inherit", fontSize: 15, lineHeight: 1.4
+          }
+        }),
+        h("button", {
+          style: Object.assign({}, btn, { background: "var(--accent, #3b82f6)", color: "#fff", borderColor: "transparent" }),
+          onClick: send, disabled: sending
+        }, sending ? "…" : "发送")
+      )
+    );
+  }
+
   var PLUGINS = window.__HERMES_PLUGINS__;
   if (PLUGINS && PLUGINS.register) {
     PLUGINS.register("hermes-zh-web", ZhPanel);
+  }
+  if (PLUGINS && PLUGINS.registerSlot) {
+    PLUGINS.registerSlot("hermes-zh-web", "chat:bottom", ChatDock);
   }
 })();
